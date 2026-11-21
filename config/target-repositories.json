@@ -78,6 +78,19 @@
         "pull_request": []
       },
       "package_manager": "npm"
+    },
+    {
+      "target_repo": "sharex/sharex",
+      "display_name": "ShareX",
+      "checkout_dir": "sharex",
+      "docs_url": "https://getsharex.com/docs",
+      "community_url": "https://discord.gg/ShareX",
+      "prompt_note": "Use the ShareX/ShareX source tree and current develop branch (ShareX uses develop as its active default branch, not main). Distinguish the two UI eras: ShareX 21.x and earlier used Windows Forms and GDI+ (Windows-only, legacy WinForms image editor), while ShareX 22.0 and later is the Avalonia UI rewrite (ShareX.Avalonia, ShareX.ImageEditor, ShareX.ScreenRecordingLib, ShareX.Platform.*). Check whether older WinForms or GDI+ issues still apply on current develop; when an old WinForms UI bug cannot be verified against Avalonia v22, keep it open as needs-info (unclear reproduction) asking whether it still reproduces on 22.4+, or propose stale_version_bug only with direct code evidence that the old component was replaced. For ShareX 22+ Avalonia regressions, check recent develop commits and open PRs closely. Never mention OpenClaw, docs.openclaw.ai, ClawHub, AI tools, or crustacean jokes. Write closeComment in plain American English, 2 to 5 short sentences, straight quotes, no em or en dashes, no headings or bullet lists, reading like a human ShareX maintainer. Review only: never auto-close directly.",
+      "apply_close_rules": {
+        "issue": [],
+        "pull_request": []
+      },
+      "package_manager": "npm"
     }
   ],
   "generic_fallbacks": [

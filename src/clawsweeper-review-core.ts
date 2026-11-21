@@ -59,6 +59,7 @@ import {
   openClawCodexSourcePreparationFailureRetryable,
   prepareOpenClawCodexSourceForReview,
 } from "./openclaw-codex-source.js";
+import { extractJsonObject } from "./openclaw-process.js";
 import { repositoryProfileFor, slugForRepo, normalizeRepo } from "./repository-profiles.js";
 import { readBoundedReviewResult } from "./review-output-policy.js";
 import { appendReviewUsage } from "./review-usage.js";
@@ -1003,7 +1004,9 @@ ${extra}
     if (!result.error && hasOutput) {
       try {
         const decision = parseDecision(
-          JSON.parse(readBoundedReviewResult(outputPath, options.resultFileBytes).trim()),
+          JSON.parse(
+            extractJsonObject(readBoundedReviewResult(outputPath, options.resultFileBytes)),
+          ),
           options.item,
         );
         if (result.status !== 0) {

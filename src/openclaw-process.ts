@@ -61,11 +61,12 @@ export function runOpenclawProcess(options: OpenClawProcessOptions): CodexProces
     );
     writeFileSync(promptPath, options.prompt, { encoding: "utf8", mode: 0o600 });
     const sessionId = openclawSessionId(options.label);
+    const agentId = options.env.CLAWSWEEPER_OPENCLAW_AGENT?.trim() || "main";
     const args = [
       "agent",
       "--local",
       "--agent",
-      "main",
+      agentId,
       "--session-id",
       sessionId,
       "--model",
@@ -180,11 +181,72 @@ export function parseOpenclawJsonEnvelope(
   };
 }
 
+export function extractJsonObject(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return trimmed;
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (isRecord(parsed)) return trimmed;
+  } catch {
+    // Fall through to fence/prose extraction for models without native structured output.
+  }
+  const fenceMatches = [...trimmed.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)];
+  for (const match of fenceMatches) {
+    const candidate = match[1]?.trim() ?? "";
+    if (!candidate.startsWith("{")) continue;
+    try {
+      const parsed = JSON.parse(candidate) as unknown;
+      if (isRecord(parsed)) return candidate;
+    } catch {
+      // Try next fenced block or balanced object scan.
+    }
+  }
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < trimmed.length; i += 1) {
+    const ch = trimmed[i]!;
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+    if (ch === "{") {
+      if (depth === 0) start = i;
+      depth += 1;
+    } else if (ch === "}" && depth > 0) {
+      depth -= 1;
+      if (depth === 0 && start >= 0) {
+        const candidate = trimmed.slice(start, i + 1);
+        try {
+          const parsed = JSON.parse(candidate) as unknown;
+          if (isRecord(parsed)) return candidate;
+        } catch {
+          // Keep scanning in case a prose brace preceded the actual JSON object.
+        }
+        start = -1;
+      }
+    }
+  }
+  return trimmed;
+}
+
 function openclawConfig(
   env: NodeJS.ProcessEnv,
   timeoutSeconds: number,
   checkoutInspection: boolean,
 ): Record<string, unknown> {
+  const readOnly = checkoutInspection || env.CLAWSWEEPER_OPENCLAW_READONLY?.trim() === "1";
   const config: Record<string, unknown> = {
     agents: {
       defaults: {
@@ -205,7 +267,7 @@ function openclawConfig(
           }
         : {}),
     },
-    tools: checkoutInspection
+    tools: readOnly
       ? {
           allow: ["read"],
           fs: { workspaceOnly: true },
