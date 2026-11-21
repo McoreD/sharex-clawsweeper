@@ -113,6 +113,7 @@ function buildShareXPrompt(mcRepo) {
     "- Distinguish UI era: ShareX <= 21.x is Windows Forms / GDI+ (Windows-only); ShareX >= 22.0 is the Avalonia UI rewrite (ShareX.Avalonia, ShareX.ImageEditor, ShareX.ScreenRecordingLib, ShareX.Platform.*).",
     "- For legacy WinForms/GDI+ issues that cannot be reproduced on Avalonia v22, keep open as needs-info (reproductionStatus: unclear) asking whether it still happens on 22.4+, or mark stale_version_bug only with direct code proof.",
     "- Never mention OpenClaw, ClawHub, AI tools, or crustacean jokes. Draft closeComment as if McoreD typed it personally.",
+    "- Never say or imply that ShareX is dropping, declining, or compromising Windows features due to cross-platform support or Avalonia.",
     humanizer ? `\nFollow these writing rules strictly for closeComment:\n\n${humanizer}` : "",
   ]
     .filter(Boolean)
